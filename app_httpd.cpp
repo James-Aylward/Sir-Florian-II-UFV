@@ -15,7 +15,7 @@
 #include "esp_timer.h"
 #include "esp_camera.h"
 #include "img_converters.h"
-#include "camera_index.h"
+#include "webpage.h"
 #include "Arduino.h"
 
 #include "fb_gfx.h"
@@ -708,7 +708,7 @@ static esp_err_t index_handler(httpd_req_t *req)
     httpd_resp_set_type(req, "text/html");
     httpd_resp_set_hdr(req, "Content-Encoding", "gzip");
     sensor_t *s = esp_camera_sensor_get();
-    return httpd_resp_send(req, (const char *)index_ov3660_html_gz, index_ov3660_html_gz_len);
+    return httpd_resp_send(req, (const char *)webpage, WEBPAGE_LENGTH);
 }
 
 void startCameraServer()

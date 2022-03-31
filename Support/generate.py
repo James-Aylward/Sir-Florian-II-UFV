@@ -13,8 +13,8 @@ for a, b in zip(result[0::2], result[1::2]):
 array = array[:-2:]
 
 # Start writing the file contents
-with open('camera_index.h', 'w') as out:
+with open('webpage.h', 'w') as out:
 
-    out.write(f"#define index_ov3660_html_gz_len {len(result) // 2}\n")
-    out.write("const uint8_t index_ov3660_html_gz[] = {\n" + array + "\n};")
+    out.write(f"#define WEBPAGE_LENGTH {len(result) // 2}\n")
+    out.write("const uint8_t webpage[] = {\n" + array + "\n};")
     out.close()
