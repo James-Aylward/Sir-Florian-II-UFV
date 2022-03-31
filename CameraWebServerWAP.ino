@@ -10,6 +10,11 @@ void startCameraServer();
 void setup()
 {
 	Serial.begin(115200);
+	while (!Serial)
+	{
+		delay(500);
+	}
+	
 	Serial.setDebugOutput(true);
 	Serial.println();
 
