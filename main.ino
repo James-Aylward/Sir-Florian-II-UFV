@@ -2,19 +2,14 @@
 #include <WiFi.h>
 #include "camera_pins.h"
 
-const char *ssid = "ESP32-CAM ACCESS POINT";
-const char *password = "0414626649";
+const char *ssid = "GOLDEN BOYS UFV";
+const char *password = "boys";
 
 void startCameraServer();
 
 void setup()
 {
 	Serial.begin(115200);
-	while (!Serial)
-	{
-		delay(500);
-	}
-	
 	Serial.setDebugOutput(true);
 	Serial.println();
 
