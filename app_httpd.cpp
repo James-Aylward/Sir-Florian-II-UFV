@@ -17,6 +17,16 @@ typedef struct
     size_t len;
 } jpg_chunking_t;
 
+typedef struct
+{
+    size_t size;  // number of values used for filtering
+    size_t index; // current value index
+    size_t count; // value count
+    int sum;
+    int *values; // array to be filled with values
+} ra_filter_t;
+
+static ra_filter_t ra_filter;
 httpd_handle_t stream_httpd = NULL;
 httpd_handle_t camera_httpd = NULL;
 
@@ -27,6 +37,39 @@ static esp_err_t cmd_handler(httpd_req_t *req);
 static esp_err_t capture_handler(httpd_req_t *req);
 static esp_err_t stream_handler(httpd_req_t *req);
 static esp_err_t status_handler(httpd_req_t *req);
+
+static ra_filter_t *ra_filter_init(ra_filter_t *filter, size_t sample_size)
+{
+    memset(filter, 0, sizeof(ra_filter_t));
+
+    filter->values = (int *)malloc(sample_size * sizeof(int));
+    if (!filter->values)
+    {
+        return NULL;
+    }
+    memset(filter->values, 0, sample_size * sizeof(int));
+
+    filter->size = sample_size;
+    return filter;
+}
+
+static int ra_filter_run(ra_filter_t *filter, int value)
+{
+    if (!filter->values)
+    {
+        return value;
+    }
+    filter->sum -= filter->values[filter->index];
+    filter->values[filter->index] = value;
+    filter->sum += filter->values[filter->index];
+    filter->index++;
+    filter->index = filter->index % filter->size;
+    if (filter->count < filter->size)
+    {
+        filter->count++;
+    }
+    return filter->sum / filter->count;
+}
 
 // Starts the camera server
 void startCameraServer()
@@ -62,6 +105,7 @@ void startCameraServer()
         .method = HTTP_GET,
         .handler = stream_handler,
         .user_ctx = NULL};
+    ra_filter_init(&ra_filter, 20);
 
     Serial.printf("Starting web server on port: '%d'\n", httpd_config.server_port);
     if (httpd_start(&camera_httpd, &httpd_config) == ESP_OK)
@@ -347,11 +391,11 @@ static esp_err_t stream_handler(httpd_req_t *req)
         int64_t frame_time = this_frame - last_frame;
         last_frame = this_frame;
         frame_time /= 1000;
-
-        Serial.println("MJPG: %uB\n, FRAMETIME %u, %0.1f FPS",
+        uint32_t avg_frame_time = ra_filter_run(&ra_filter, frame_time);
+        Serial.printf("MJPG: %uB, FRAMETIME %ums, %.1f FPS\n",
                       (uint32_t)(_jpg_buf_len),
                       (uint32_t)frame_time,
-                      1000 / (uint32_t)frame_time);
+                      1000.0 / (uint32_t)frame_time);
     }
 
     last_frame = 0;
