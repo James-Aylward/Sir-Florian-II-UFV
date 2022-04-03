@@ -1,7 +1,13 @@
+"""
+Generates a gzip hex dump of index.html and 
+saves as C byte array in webpage.h for
+serving by app_httpd.cpp static esp_err_t index_handler(httpd_req_t *req)
+"""
+
 from chepy import Chepy
 
 # Open HTML file and read contents into variable
-with open('Support/index.html') as html:
+with open('support/index.html') as html:
     htmlContents = html.read()
 
 # Generate the array for the file
@@ -14,7 +20,6 @@ array = array[:-2:]
 
 # Start writing the file contents
 with open('webpage.h', 'w') as out:
-
-    out.write(f"#define WEBPAGE_LENGTH {len(result) // 2}\n")
+    out.write(f"#include <stdint.h>\n#define WEBPAGE_LENGTH {len(result) // 2}\n")
     out.write("const uint8_t webpage[] = {\n" + array + "\n};")
     out.close()
