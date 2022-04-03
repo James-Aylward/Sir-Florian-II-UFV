@@ -38,6 +38,7 @@ static esp_err_t capture_handler(httpd_req_t *req);
 static esp_err_t stream_handler(httpd_req_t *req);
 static esp_err_t status_handler(httpd_req_t *req);
 
+// Unknown
 static ra_filter_t *ra_filter_init(ra_filter_t *filter, size_t sample_size)
 {
     memset(filter, 0, sizeof(ra_filter_t));
@@ -53,6 +54,7 @@ static ra_filter_t *ra_filter_init(ra_filter_t *filter, size_t sample_size)
     return filter;
 }
 
+// Unknown
 static int ra_filter_run(ra_filter_t *filter, int value)
 {
     if (!filter->values)
