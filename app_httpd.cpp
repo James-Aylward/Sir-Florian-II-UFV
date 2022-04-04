@@ -35,9 +35,6 @@ static ra_filter_t ra_filter;
 httpd_handle_t stream_httpd = NULL;
 httpd_handle_t camera_httpd = NULL;
 
-// DEBUG
-bool print_stream_stats = true;
-
 void startCameraServer();
 static size_t jpg_encode_stream(void *arg, size_t index, const void *data, size_t len);
 static esp_err_t index_handler(httpd_req_t *req);
@@ -275,10 +272,13 @@ static esp_err_t cmd_handler(httpd_req_t *req)
         Serial.printf("tup %u\n", val);
     else if (!strcmp(variable, "tdown"))
         Serial.printf("tdown %u\n", val);
-    else if (!strcmp(variable, "serial"))
+    else if (!strcmp(variable, "light"))
     {
-        print_stream_stats = !print_stream_stats;
-        Serial.printf("serial %u\n", val);
+        if (val == 1)
+            digitalWrite(33, HIGH);
+        else
+            digitalWrite(33, LOW);
+        Serial.printf("light %u\n", val);
     }
 
     else
@@ -421,16 +421,12 @@ static esp_err_t stream_handler(httpd_req_t *req)
         frame_time /= 1000;
         uint32_t avg_frame_time = ra_filter_run(&ra_filter, frame_time);
 
-        // DEBUG REMOVE
-        if (print_stream_stats)
-        {
-            Serial.printf("MJPG: %uB, FT %ums, %.1f FPS, AVG FT %u, AVG %.1fFPS\n",
-                          (uint32_t)(_jpg_buf_len),
-                          (uint32_t)frame_time,
-                          1000.0 / (uint32_t)frame_time,
-                          (uint32_t)avg_frame_time,
-                          1000.0 / (uint32_t)avg_frame_time);
-        }
+        Serial.printf("MJPG: %uB, FT %ums, %.1f FPS, AVG FT %u, AVG %.1fFPS\n",
+                      (uint32_t)(_jpg_buf_len),
+                      (uint32_t)frame_time,
+                      1000.0 / (uint32_t)frame_time,
+                      (uint32_t)avg_frame_time,
+                      1000.0 / (uint32_t)avg_frame_time);
     }
 
     last_frame = 0;

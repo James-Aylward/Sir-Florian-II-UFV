@@ -14,6 +14,9 @@ void setup()
 	Serial.setDebugOutput(true);
 	Serial.println();
 
+	// TODO remove
+	pinMode(33, OUTPUT);
+
 	// Set up camera pins and check for errors
 	camera_config_t camera_config = generate_camera();
 	esp_err_t err = esp_camera_init(&camera_config);

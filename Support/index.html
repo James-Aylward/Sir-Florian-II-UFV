@@ -654,54 +654,11 @@
     </section>
     <script>
 
-        // Code for when a key is presseds
-        window.addEventListener('keydown', function (e) {
-            // Prevent arrow keys from scrolling page
-            if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(e.code) > -1) {
-                e.preventDefault();
-            }
-
-            // Stop repeated key press
-            if (e.repeat) { return }
-
+        // Sends a command with a value based on keypress
+        function commandHandler(key, value) {
             var command = "";
 
-            switch (e.key) {
-                case 'w':
-                    command = "forward"
-                    break
-                case 's':
-                    command = "backward"
-                    break
-                case 'ArrowLeft':
-                    command = "tleft"
-                    break
-                case 'ArrowRight':
-                    command = "tright"
-                    break
-                case 'ArrowUp':
-                    command = "tup"
-                    break
-                case 'ArrowDown':
-                    command = "tdown"
-                    break
-            }
-
-            document.querySelector('p').innerHTML = command + " 1";
-            console.log(`${command} 1`)
-
-            const query = `${document.location.origin}/control?var=${command}&val=${1}`
-            fetch(query)
-                .then(response => {
-                    console.log(`request to ${query} finished, status: ${response.status}`)
-                })
-
-        }, false);
-
-        window.addEventListener('keyup', function (e) {
-            var command = "";
-
-            switch (e.key) {
+            switch (key) {
                 case 'w':
                     command = "forward"
                     break
@@ -721,19 +678,40 @@
                     command = "tdown"
                     break
                 case 'p':
-                    command = "serial"
+                    command = "light"
                     break
+                default:
+                    return;
             }
 
-            document.querySelector('p').innerHTML = command + " 0"
-            console.log(`${command} 0`)
+            document.querySelector('p').innerHTML = command + " " + value;
+            console.log(`${command} ${value}`)
 
-            const query = `${document.location.origin}/control?var=${command}&val=${0}`
+            const query = `${document.location.origin}/control?var=${command}&val=${value}`
             fetch(query)
                 .then(response => {
                     console.log(`request to ${query} finished, status: ${response.status}`)
                 })
 
+        }
+
+        // Keydown function
+        window.addEventListener('keydown', function (e) {
+            // Prevent arrow keys from scrolling page
+            if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(e.code) > -1) {
+                e.preventDefault();
+            }
+
+            // Stop repeated key press
+            if (e.repeat) { return }
+
+            commandHandler(e.key, 1)
+
+        }, false);
+
+        // Keyup function
+        window.addEventListener('keyup', function (e) {
+            commandHandler(e.key, 0)
         }, false);
 
         document.addEventListener('DOMContentLoaded', function (event) {
