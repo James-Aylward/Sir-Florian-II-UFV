@@ -30,6 +30,9 @@ static ra_filter_t ra_filter;
 httpd_handle_t stream_httpd = NULL;
 httpd_handle_t camera_httpd = NULL;
 
+// DEBUG
+bool print_stream_stats = true;
+
 void startCameraServer();
 static size_t jpg_encode_stream(void *arg, size_t index, const void *data, size_t len);
 static esp_err_t index_handler(httpd_req_t *req);
@@ -255,7 +258,19 @@ static esp_err_t cmd_handler(httpd_req_t *req)
         res = s->set_wb_mode(s, val);
     else if (!strcmp(variable, "ae_level"))
         res = s->set_ae_level(s, val);
-    else
+
+    // TODO UFV Control
+    else if (!strcmp(variable, "forward"))
+        Serial.printf("forward %u\n", val) else if (!strcmp(variable, "backward"))
+            Serial.printf("backward %u\n", val) else if (!strcmp(variable, "tleft"))
+                Serial.printf("tleft %u\n", val) else if (!strcmp(variable, "tright"))
+                    Serial.printf("tright %u\n", val) else if (!strcmp(variable, "tup"))
+                        Serial.printf("tup %u\n", val) else if (!strcmp(variable, "tdown"))
+                            Serial.printf("tdown %u\n", val) else if (!strcmp(variable, "serial"))
+                                print_stream_stats = !print_stream_stats;
+    Serial.printf("serial %u\n", val)
+
+        else
     {
         res = -1;
     }
@@ -394,10 +409,17 @@ static esp_err_t stream_handler(httpd_req_t *req)
         last_frame = this_frame;
         frame_time /= 1000;
         uint32_t avg_frame_time = ra_filter_run(&ra_filter, frame_time);
-        Serial.printf("MJPG: %uB, FRAMETIME %ums, %.1f FPS\n",
-                      (uint32_t)(_jpg_buf_len),
-                      (uint32_t)frame_time,
-                      1000.0 / (uint32_t)frame_time);
+
+        // DEBUG REMOVE
+        if (print_stream_stats)
+        {
+            Serial.printf("MJPG: %uB, FT %ums, %.1f FPS, AVG FT %u, AVG %.1fFPS\n",
+                          (uint32_t)(_jpg_buf_len),
+                          (uint32_t)frame_time,
+                          1000.0 / (uint32_t)frame_time,
+                          (uint32_t)avg_frame_time,
+                          1000.0 / (uint32_t)avg_frame_time);
+        }
     }
 
     last_frame = 0;

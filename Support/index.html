@@ -720,6 +720,9 @@
                 case 'ArrowDown':
                     command = "tdown"
                     break
+                case 'p':
+                    command = "serial"
+                    break
             }
 
             document.querySelector('p').innerHTML = command + " 0"
