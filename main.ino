@@ -1,5 +1,7 @@
 #include "esp_camera.h"
 #include "camera_pins.h"
+#include "ufv_control.h"
+#include "esp32-hal-ledc.h"
 #include <WiFi.h>
 
 const char *ssid = "Saint Florian II UFV";
@@ -14,8 +16,10 @@ void setup()
 	Serial.setDebugOutput(true);
 	Serial.println();
 
-	// TODO remove
-	pinMode(33, OUTPUT);
+	pinMode(33, OUTPUT); // built in LED
+	pinMode(MOTOR_A, OUTPUT);
+	pinMode(MOTOR_B, OUTPUT);
+	pinMode(MOTOR_ENABLE, OUTPUT);
 
 	// Set up camera pins and check for errors
 	camera_config_t camera_config = generate_camera();
@@ -28,9 +32,6 @@ void setup()
 
 	// Set up sensors - initially flipped vertically and colors are a bit saturated
 	sensor_t *s = esp_camera_sensor_get();
-	s->set_vflip(s, 1);		  // flip it back
-	s->set_brightness(s, 1);  // up the brightness just a bit
-	s->set_saturation(s, -2); // lower the saturation
 	s->set_framesize(s, FRAMESIZE_QVGA);
 
 	// Start up WAP

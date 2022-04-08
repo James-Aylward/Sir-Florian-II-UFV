@@ -3,6 +3,7 @@ Functions responsible for running
 the ESP32-Cam web server
 */
 
+#include "ufv_control.h"
 #include "webpage.h"
 #include "Arduino.h"
 #include <stdint.h>
@@ -15,6 +16,10 @@ the ESP32-Cam web server
 static const char *_STREAM_CONTENT_TYPE = "multipart/x-mixed-replace;boundary=" PART_BOUNDARY;
 static const char *_STREAM_BOUNDARY = "\r\n--" PART_BOUNDARY "\r\n";
 static const char *_STREAM_PART = "Content-Type: image/jpeg\r\nContent-Length: %u\r\n\r\n";
+
+// #define MOTOR_ENABLE 15
+// #define MOTOR_A 12
+// #define MOTOR_B 13
 
 typedef struct
 {
@@ -261,9 +266,15 @@ static esp_err_t cmd_handler(httpd_req_t *req)
     else if (!strcmp(variable, "ae_level"))
         res = s->set_ae_level(s, val);
     else if (!strcmp(variable, "forward"))
+    {
+        control_motor("forward", val);
         Serial.printf("forward %u\n", val);
+    }
     else if (!strcmp(variable, "backward"))
+    {
+        control_motor("backward", val);
         Serial.printf("backward %u\n", val);
+    }
     else if (!strcmp(variable, "tleft"))
         Serial.printf("tleft %u\n", val);
     else if (!strcmp(variable, "tright"))
