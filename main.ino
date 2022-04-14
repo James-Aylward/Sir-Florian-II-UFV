@@ -17,9 +17,8 @@ void setup()
 	Serial.println();
 
 	pinMode(33, OUTPUT); // built in LED
-	pinMode(MOTOR_A, OUTPUT);
-	pinMode(MOTOR_B, OUTPUT);
-	pinMode(MOTOR_ENABLE, OUTPUT);
+	motor_init(); // Set up motor pins
+	
 
 	// Set up camera pins and check for errors
 	camera_config_t camera_config = generate_camera();
