@@ -18,6 +18,7 @@ void setup()
 
 	pinMode(33, OUTPUT); // built in LED
 	motor_init(); // Set up motor pins
+	servo_init(); // Set up servo
 	
 
 	// Set up camera pins and check for errors

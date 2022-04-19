@@ -17,7 +17,6 @@ static const char *_STREAM_CONTENT_TYPE = "multipart/x-mixed-replace;boundary=" 
 static const char *_STREAM_BOUNDARY = "\r\n--" PART_BOUNDARY "\r\n";
 static const char *_STREAM_PART = "Content-Type: image/jpeg\r\nContent-Length: %u\r\n\r\n";
 
-
 typedef struct
 {
     httpd_req_t *req;
@@ -264,20 +263,13 @@ static esp_err_t cmd_handler(httpd_req_t *req)
     else if (!strcmp(variable, "ae_level"))
         res = s->set_ae_level(s, val);
     else if (!strcmp(variable, "forward"))
-    {
         control_motor("forward", ((val == 0) ? 0 : motor_speed));
-    }
     else if (!strcmp(variable, "backward"))
-    {
         control_motor("backward", ((val == 0) ? 0 : motor_speed));
-    }
     else if (!strcmp(variable, "motor-speed"))
-    {
         motor_speed = val;
-        Serial.printf("motor-speed %u\n", val);
-    }
     else if (!strcmp(variable, "tleft"))
-        Serial.printf("tleft %u\n", val);
+        control_servo();
     else if (!strcmp(variable, "tright"))
         Serial.printf("tright %u\n", val);
     else if (!strcmp(variable, "tup"))
@@ -480,8 +472,6 @@ static esp_err_t status_handler(httpd_req_t *req)
     p += sprintf(p, "\"dcw\":%u,", s->status.dcw);
     p += sprintf(p, "\"colorbar\":%u,", s->status.colorbar);
     p += sprintf(p, "\"motorspeed\":%u,", motor_speed);
-    p += sprintf(p, "\"forwardmotorspeed\":%u,", (1 == 0) ? 0 : motor_speed);
-    p += sprintf(p, "\"backwardmotorspeed\":%u,", (0 == 0) ? 0 : motor_speed);
     *p++ = '}';
     *p++ = 0;
     httpd_resp_set_type(req, "application/json");
