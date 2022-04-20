@@ -619,20 +619,20 @@
                         <div class="range-max">100%</div>
                     </div>
 
-                    <!-- Motor Speed -->
-                    <div class="input-group" id="pan-speed-group">
-                        <label for="pan-speed">Pan Speed</label>
-                        <div class="range-min">0%</div>
-                        <input type="range" id="pan-speed" min="0" max="100" value="50" class="default-action">
-                        <div class="range-max">100%</div>
+                    <!-- Pan Step -->
+                    <div class="input-group" id="pan-step-group">
+                        <label for="pan-step">Pan Step</label>
+                        <div class="range-min">1</div>
+                        <input type="range" id="pan-step" min="1" max="45" value="20" class="default-action">
+                        <div class="range-max">45</div>
                     </div>
 
-                    <!-- Motor Speed -->
-                    <div class="input-group" id="tilt-speed-group">
-                        <label for="tilt-speed">Tilt Speed</label>
-                        <div class="range-min">0%</div>
-                        <input type="range" id="tilt-speed" min="0" max="100" value="50" class="default-action">
-                        <div class="range-max">100%</div>
+                    <!-- Tilt Step -->
+                    <div class="input-group" id="tilt-step-group">
+                        <label for="tilt-step">Tilt Step</label>
+                        <div class="range-min">1</div>
+                        <input type="range" id="tilt-step" min="1" max="45" value="20" class="default-action">
+                        <div class="range-max">45</div>
                     </div>
 
                     <p>Press a key</p>
@@ -654,6 +654,34 @@
     </section>
     <script>
 
+        var panTime = Date.now();
+        var tiltTime = Date.now();
+        const servoDelay = 100;
+
+        function continousHandler(key, value) {
+            command = "";
+
+            if (key == 'ArrowLeft' && Date.now() - panTime >= servoDelay) {
+                command = 'tleft'
+                panTime = Date.now()
+            } else if (key == 'ArrowRight' && Date.now() - panTime >= servoDelay) {
+                command = 'tright'
+                panTime = Date.now()
+            } else if (key == 'ArrowDown' && Date.now() - tiltTime >= servoDelay) {
+                command = 'tdown'
+                tiltTime = Date.now()
+            } else if (key == 'ArrowUp' && Date.now() - tileTime >= servoDelay) {
+                command = 'tup'
+                tiltTime = Date.now()
+            } else { return; }
+
+            const query = `${document.location.origin}/control?var=${command}&val=${value}`
+            fetch(query)
+                .then(response => {
+                    console.log(`request to ${query} finished, status: ${response.status}`)
+                })
+        }
+
         // Sends a command with a value based on keypress
         function commandHandler(key, value) {
             var command = "";
@@ -664,18 +692,6 @@
                     break
                 case 's':
                     command = "backward"
-                    break
-                case 'ArrowLeft':
-                    command = "tleft"
-                    break
-                case 'ArrowRight':
-                    command = "tright"
-                    break
-                case 'ArrowUp':
-                    command = "tup"
-                    break
-                case 'ArrowDown':
-                    command = "tdown"
                     break
                 case 'p':
                     command = "light"
@@ -702,10 +718,9 @@
                 e.preventDefault();
             }
 
-            // Stop repeated key press
-            if (e.repeat) { return }
-
-            commandHandler(e.key, 1)
+            if (!e.repeat)
+                commandHandler(e.key, 1)
+            continousHandler(e.key, 1)
 
         }, false);
 

@@ -32,7 +32,13 @@ typedef struct
     int *values; // array to be filled with values
 } ra_filter_t;
 
+// UFV controls
 int motor_speed = 200;
+int pan_pos = 90;
+int tilt_pos = 90;
+int pan_step = 20;
+int tilt_step = 20;
+
 static ra_filter_t ra_filter;
 httpd_handle_t stream_httpd = NULL;
 httpd_handle_t camera_httpd = NULL;
@@ -262,33 +268,51 @@ static esp_err_t cmd_handler(httpd_req_t *req)
         res = s->set_wb_mode(s, val);
     else if (!strcmp(variable, "ae_level"))
         res = s->set_ae_level(s, val);
-    else if (!strcmp(variable, "forward"))
-        control_motor("forward", ((val == 0) ? 0 : motor_speed));
-    else if (!strcmp(variable, "backward"))
-        control_motor("backward", ((val == 0) ? 0 : motor_speed));
+
+    // UFV Controls
+    else if (!strcmp(variable, "forward") || !strcmp(variable, "backward"))
+        control_motor(variable, ((val == 0) ? 0 : motor_speed));
+
     else if (!strcmp(variable, "motor-speed"))
         motor_speed = val;
+
+    else if (!strcmp(variable, "pan-step"))
+        pan_step = val;
+
+    else if (!strcmp(variable, "tilt-step"))
+        tilt_step = val;
+
     else if (!strcmp(variable, "tleft"))
-        control_servo();
-    else if (!strcmp(variable, "tright"))
-        Serial.printf("tright %u\n", val);
-    else if (!strcmp(variable, "tup"))
-        Serial.printf("tup %u\n", val);
-    else if (!strcmp(variable, "tdown"))
-        Serial.printf("tdown %u\n", val);
-    else if (!strcmp(variable, "light"))
     {
-        if (val == 1)
-            digitalWrite(33, HIGH);
-        else
-            digitalWrite(33, LOW);
-        Serial.printf("light %u\n", val);
+        pan_pos = (pan_pos - pan_step < 0 ? 0 : pan_pos - pan_step);
+        move_servo("pan", pan_pos);
     }
 
-    else
+    else if (!strcmp(variable, "tright"))
     {
-        res = -1;
+        pan_pos = (pan_pos + pan_step > 180 ? 180 : pan_pos + pan_step);
+        move_servo("pan", pan_pos);
     }
+
+    else if (!strcmp(variable, "tup"))
+    {
+        // TODO add guard
+        tilt_pos += tilt_step;
+        // move_servo("tilt", tilt_pos);
+    }
+
+    else if (!strcmp(variable, "tdown"))
+    {
+        // TODO add guard
+        tilt_pos += tilt_step;
+        // move_servo("tilt", tilt_pos);
+    }
+
+    else if (!strcmp(variable, "light"))
+        digitalWrite(33, ((val == 1) ? HIGH : LOW));
+
+    else
+        res = -1;
 
     if (res)
     {
