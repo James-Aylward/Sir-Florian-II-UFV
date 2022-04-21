@@ -17,10 +17,12 @@ Functions that are responsible for controlling the UFV
 #define MOTOR_FREQ 20000
 
 #define PAN_SERVO_ENABLE 2
+#define TILT_SERVO_ENABLE 3
 
 Servo null1;
 Servo null2;
 Servo panServo;
+Servo tiltServo;
 
 void motor_init();
 void servo_init();
@@ -38,10 +40,16 @@ void motor_init()
 void servo_init()
 {
     panServo.setPeriodHertz(50);
+    tiltServo.setPeriodHertz(50);
+
     null1.attach(PAN_SERVO_ENABLE, 1000, 2000);
     null2.attach(PAN_SERVO_ENABLE, 1000, 2000);
-    panServo.attach(PAN_SERVO_ENABLE, 1000, 2000); // attaches the servo on pin 18 to the servo object
+
+    panServo.attach(PAN_SERVO_ENABLE, 1000, 2000);
     panServo.write(90);
+
+    tiltServo.attach(TILT_SERVO_ENABLE, 1000, 2000);
+    tiltServo.write(90);
 }
 
 void control_motor(String direction, int value)
@@ -63,6 +71,8 @@ void control_motor(String direction, int value)
 
 void move_servo(String plane, int value)
 {
-    panServo.write(value);
-    Serial.printf("Position: %d\n", value);
+    if (plane == 'pan')
+        panServo.write(value);
+    else if (plane == 'tilt')
+        tiltServo.write(value);
 }

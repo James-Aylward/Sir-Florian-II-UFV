@@ -296,16 +296,14 @@ static esp_err_t cmd_handler(httpd_req_t *req)
 
     else if (!strcmp(variable, "tup"))
     {
-        // TODO add guard
-        tilt_pos += tilt_step;
-        // move_servo("tilt", tilt_pos);
+        tilt_pos = (tilt_pos + tilt_step > 180 ? 180 : tilt_pos + tilt_step);
+        move_servo("tilt", tilt_pos);
     }
 
     else if (!strcmp(variable, "tdown"))
     {
-        // TODO add guard
-        tilt_pos += tilt_step;
-        // move_servo("tilt", tilt_pos);
+        tilt_pos = (tilt_pos - tilt_step < 0 ? 0 : tilt_pos - tilt_step);
+        move_servo("tilt", tilt_pos);
     }
 
     else if (!strcmp(variable, "light"))
